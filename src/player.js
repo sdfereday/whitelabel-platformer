@@ -91,7 +91,7 @@ export default ({ scene, x, y }) => {
         // --- Move the player horizontally ---
 
         // Adjust the movement so that the player is slower in the air
-        const moveForce = isOnGround ? 0.01 : 0.005;
+        const moveForce = isOnGround ? 0.009 : 0.005;
 
         if (isLeftKeyDown) {
             sprite.setFlipX(true);

@@ -17,7 +17,7 @@ const config = {
   height: 600,
   backgroundColor: "#000c1f",
   parent: "game-container",
-  scene: MainScene,
+  scene: MainScene, // Will call a 'new Object' internally
   pixelArt: true,
   physics: { default: "matter" },
   plugins: {
