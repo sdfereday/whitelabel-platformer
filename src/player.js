@@ -49,6 +49,9 @@ export default ({ scene, x, y }) => {
     // Jumping is going to have a cooldown
     const [canJump, setCanJump] = useState(true);
     const [jumpCooldownTimer, setJumpCooldownTimer] = useState(null);
+    const [canDoubleJump, setCanDoubleJump] = useState(true);
+    const [doubleJumpCooldownTimer, setDoubleJumpCooldownTimer] = useState(null);
+    const [jumpReleased, setJumpReleased] = useState(true);
 
     /// METHODS
     const onSensorCollide = ({ bodyA, bodyB, pair }) => {
@@ -89,35 +92,37 @@ export default ({ scene, x, y }) => {
         const isInAir = !isOnGround;
 
         // --- Move the player horizontally ---
-
         // Adjust the movement so that the player is slower in the air
-        const moveForce = isOnGround ? 0.009 : 0.005;
+        //const moveForce = isOnGround ? 0.009 : 0.005;
+        const directMoveForce = isOnGround ? 3 : 3;
 
         if (isLeftKeyDown) {
             sprite.setFlipX(true);
 
             // Don't let the player push things left if they in the air
             if (!(isInAir && isTouchingLeft())) {
-                sprite.applyForce({ x: -moveForce, y: 0 });
+                //sprite.applyForce({ x: -moveForce, y: 0 });
+                sprite.setVelocityX(-directMoveForce)
             }
         } else if (isRightKeyDown) {
             sprite.setFlipX(false);
 
             // Don't let the player push things right if they in the air
             if (!(isInAir && isTouchingRight())) {
-                sprite.applyForce({ x: moveForce, y: 0 });
+                //sprite.applyForce({ x: moveForce, y: 0 });
+                sprite.setVelocityX(directMoveForce)
             }
         }
 
         // Limit horizontal speed, without this the player's velocity would just keep increasing to
         // absurd speeds. We don't want to touch the vertical velocity though, so that we don't
         // interfere with gravity.
-        if (velocity.x > 7) sprite.setVelocityX(7);
-        else if (velocity.x < -7) sprite.setVelocityX(-7);
+        if (velocity.x > directMoveForce) sprite.setVelocityX(directMoveForce);
+        else if (velocity.x < -directMoveForce) sprite.setVelocityX(-directMoveForce);
 
         // --- Move the player vertically ---
-
-        if (isJumpKeyDown && canJump() && isOnGround) {
+        if (isJumpKeyDown && canJump() && isOnGround && jumpReleased()) {
+            setJumpReleased(false);
             sprite.setVelocityY(-11);
 
             // Add a slight delay between jumps since the bottom sensor will still collide for a few
@@ -127,13 +132,34 @@ export default ({ scene, x, y }) => {
                 delay: 250,
                 callback: () => setCanJump(true)
             }));
+            
+            setCanDoubleJump(true)
+            setDoubleJumpCooldownTimer(time.addEvent({
+                delay: 500,
+                callback: () => setCanDoubleJump(false)
+            }))
         }
+
+        // Doesn't take in to account if you just fell off a ledge. You'll need to check 'last collided' for that
+        if (isJumpKeyDown && !isOnGround && canDoubleJump() && jumpReleased()) {
+            setJumpReleased(false);
+            sprite.setVelocityY(-11);            
+        }
+
+        if (!jumpReleased() && !isJumpKeyDown && isOnGround) {
+            setJumpReleased(true);
+            setCanDoubleJump(true);
+        }
+
+        if (!isJumpKeyDown && !isOnGround)
+            setJumpReleased(true);
 
         // Update the animation/texture based on the state of the player's state
         if (isOnGround) {
-            if (sprite.body.force.x !== 0) sprite.anims.play("player-run", true);
+            if (sprite.body.velocity.x !== 0) sprite.anims.play("player-run", true);
             else sprite.anims.play("player-idle", true);
         } else {
+            // TODO: How about a sommersault on double jump? :o (just the animation, leave the body alone)
             sprite.anims.stop();
             sprite.setTexture("player", 10);
         }
@@ -159,6 +185,7 @@ export default ({ scene, x, y }) => {
         matterCollision.removeOnCollideActive({ objectA: collisionsToRemove });
 
         if (jumpCooldownTimer()) jumpCooldownTimer().destroy();
+        if (doubleJumpCooldownTimer()) doubleJumpCooldownTimer().destroy();
 
         setIsDestroyed(true);
         sprite.destroy();
