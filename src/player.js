@@ -53,6 +53,12 @@ export default ({ scene, x, y }) => {
     const [doubleJumpCooldownTimer, setDoubleJumpCooldownTimer] = useState(null);
     const [jumpReleased, setJumpReleased] = useState(true);
 
+    // Track the keys
+    const { LEFT, RIGHT, UP, A, D, W } = Phaser.Input.Keyboard.KeyCodes;
+    const leftInput = MultiKey(scene, [LEFT, A]);
+    const rightInput = MultiKey(scene, [RIGHT, D]);
+    const jumpInput = MultiKey(scene, [UP, W]);
+
     /// METHODS
     const onSensorCollide = ({ bodyA, bodyB, pair }) => {
         // Watch for the player colliding with walls/objects on either side and the ground below, so
@@ -74,13 +80,6 @@ export default ({ scene, x, y }) => {
         }
     }
 
-    // Track the keys
-    const { LEFT, RIGHT, UP, A, D, W } = Phaser.Input.Keyboard.KeyCodes;
-    const leftInput = MultiKey(scene, [LEFT, A]);
-    const rightInput = MultiKey(scene, [RIGHT, D]);
-    const jumpInput = MultiKey(scene, [UP, W]);
-
-    /// METHODS
     const update = () => {
         if (isDestroyed()) return;
 

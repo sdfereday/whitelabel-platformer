@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import Player from "./player";
+import Enemy from "./enemy-roaming";
 import { makeMap } from "./map-methods";
 import { testScene } from "./stub-data";
 import { preloader } from "./helpers";
@@ -30,6 +31,12 @@ export default class MainScene extends Phaser.Scene {
       x,
       y
     });
+
+    const enemy = Enemy({
+      scene: this,
+      x: x + 460,
+      y
+    })
 
     /// Camera and world physics bounds
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);

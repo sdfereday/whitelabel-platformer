@@ -2,7 +2,8 @@ export const testScene = {
   tilemaps: [
     {
       // args: ["map", "../assets/tilemaps/level.json"]
-      args: ["map", "../assets/tilemaps/level-flat.json"]
+      // args: ["map", "../assets/tilemaps/level-flat.json"]
+      args: ["map", "../assets/tilemaps/level-enemy.json"]
     }
   ],
   images: [
